@@ -29,13 +29,17 @@
 
 ## Vitrine Pública
 - [x] Criar página pública de exibição de veículos
-- [x] Implementar grid responsivo de cards de veículos
+- [x] Implementar grid responsivo de cards de veículos (otimizado com lazy loading)
 - [x] Adicionar filtros e busca de veículos
 - [x] Adicionar informações de contato da loja
 - [x] Criar rotas tRPC para CRUD de veículos
-- [ ] Criar página de detalhes do veículo
-- [ ] Implementar galeria de imagens
-- [ ] Integrar upload de imagens
+- [x] Criar página de detalhes do veículo com carousel
+- [x] Implementar galeria de imagens com thumbnails
+- [x] Integrar WhatsApp lead generation
+- [x] Otimizar performance com lazy loading
+- [x] Criar componente VehicleCard reutilizável
+- [ ] Adicionar filtros avançados
+- [ ] Implementar favoritos/wishlist
 
 ## Responsividade & UX
 - [x] Testar layout em desktop (1920px+)
