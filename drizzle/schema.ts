@@ -1,4 +1,5 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean } from "drizzle-orm/mysql-core";
+import { relations } from "drizzle-orm";
 
 /**
  * Core user table backing auth flow.
@@ -25,4 +26,123 @@ export const users = mysqlTable("users", {
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 
-// TODO: Add your tables here
+/**
+ * Tenants table - Represents each car dealership store
+ * Multi-Tenant architecture: Each tenant is isolated via RLS
+ */
+export const tenants = mysqlTable("tenants", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Unique subdomain identifier (e.g., "loja-a" from "loja-a.autogestao.com.br") */
+  subdomain: varchar("subdomain", { length: 64 }).notNull().unique(),
+  /** Store name */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** Store description */
+  description: text("description"),
+  /** Contact email */
+  email: varchar("email", { length: 320 }),
+  /** Contact phone */
+  phone: varchar("phone", { length: 20 }),
+  /** Store logo URL */
+  logoUrl: text("logoUrl"),
+  /** Store address */
+  address: text("address"),
+  /** Store city */
+  city: varchar("city", { length: 100 }),
+  /** Store state */
+  state: varchar("state", { length: 2 }),
+  /** Store zip code */
+  zipCode: varchar("zipCode", { length: 10 }),
+  /** Store website */
+  website: varchar("website", { length: 255 }),
+  /** Is tenant active */
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Tenant = typeof tenants.$inferSelect;
+export type InsertTenant = typeof tenants.$inferInsert;
+
+/**
+ * Profiles table - Represents users/dealers associated with a tenant
+ * Links users to their tenant with tenant_id for RLS isolation
+ */
+export const profiles = mysqlTable("profiles", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Reference to user from auth system */
+  userId: int("userId").notNull(),
+  /** Reference to tenant - CRITICAL for RLS isolation */
+  tenantId: int("tenantId").notNull(),
+  /** User role within the tenant (owner, manager, viewer) */
+  role: mysqlEnum("role", ["owner", "manager", "viewer"]).default("viewer").notNull(),
+  /** Is profile active */
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Profile = typeof profiles.$inferSelect;
+export type InsertProfile = typeof profiles.$inferInsert;
+
+/**
+ * Vehicles table - Represents cars in a tenant's inventory
+ * Isolated by tenant_id via RLS - each tenant only sees their own vehicles
+ */
+export const vehicles = mysqlTable("vehicles", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Reference to tenant - CRITICAL for RLS isolation */
+  tenantId: int("tenantId").notNull(),
+  /** Vehicle make/brand (e.g., "Toyota") */
+  make: varchar("make", { length: 100 }).notNull(),
+  /** Vehicle model (e.g., "Corolla") */
+  model: varchar("model", { length: 100 }).notNull(),
+  /** Vehicle year */
+  year: int("year").notNull(),
+  /** Vehicle color */
+  color: varchar("color", { length: 50 }),
+  /** Vehicle mileage in km */
+  mileage: int("mileage"),
+  /** Vehicle price */
+  price: decimal("price", { precision: 12, scale: 2 }).notNull(),
+  /** Vehicle description */
+  description: text("description"),
+  /** Vehicle fuel type (gasoline, diesel, electric, hybrid) */
+  fuelType: varchar("fuelType", { length: 50 }),
+  /** Vehicle transmission type (manual, automatic) */
+  transmission: varchar("transmission", { length: 50 }),
+  /** Vehicle body type (sedan, suv, truck, etc) */
+  bodyType: varchar("bodyType", { length: 50 }),
+  /** Main image URL */
+  imageUrl: text("imageUrl"),
+  /** Additional images (JSON array of URLs) */
+  additionalImages: text("additionalImages"),
+  /** Is vehicle available for sale */
+  isAvailable: boolean("isAvailable").default(true).notNull(),
+  /** Featured vehicle for homepage */
+  isFeatured: boolean("isFeatured").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Vehicle = typeof vehicles.$inferSelect;
+export type InsertVehicle = typeof vehicles.$inferInsert;
+
+// Relations for type safety
+export const tenantsRelations = relations(tenants, ({ many }) => ({
+  profiles: many(profiles),
+  vehicles: many(vehicles),
+}));
+
+export const profilesRelations = relations(profiles, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [profiles.tenantId],
+    references: [tenants.id],
+  }),
+}));
+
+export const vehiclesRelations = relations(vehicles, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [vehicles.tenantId],
+    references: [tenants.id],
+  }),
+}));

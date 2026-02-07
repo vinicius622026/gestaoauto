@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, tenants, profiles, vehicles, InsertVehicle } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,115 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+/**
+ * Get a tenant by subdomain
+ */
+export async function getTenantBySubdomain(subdomain: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(tenants)
+    .where(eq(tenants.subdomain, subdomain))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Get a tenant by ID
+ */
+export async function getTenantById(tenantId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(tenants)
+    .where(eq(tenants.id, tenantId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Get user's profile for a tenant
+ */
+export async function getUserProfile(userId: number, tenantId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(profiles)
+    .where(and(eq(profiles.userId, userId), eq(profiles.tenantId, tenantId)))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Get all vehicles for a tenant
+ */
+export async function getTenantVehicles(tenantId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return db
+    .select()
+    .from(vehicles)
+    .where(eq(vehicles.tenantId, tenantId));
+}
+
+/**
+ * Get a vehicle by ID (with tenant check for security)
+ */
+export async function getVehicleById(vehicleId: number, tenantId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(vehicles)
+    .where(and(eq(vehicles.id, vehicleId), eq(vehicles.tenantId, tenantId)))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+/**
+ * Create a new vehicle for a tenant
+ */
+export async function createVehicle(data: InsertVehicle) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(vehicles).values(data);
+  return result;
+}
+
+/**
+ * Update a vehicle
+ */
+export async function updateVehicle(vehicleId: number, tenantId: number, data: Partial<InsertVehicle>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db
+    .update(vehicles)
+    .set(data)
+    .where(and(eq(vehicles.id, vehicleId), eq(vehicles.tenantId, tenantId)));
+}
+
+/**
+ * Delete a vehicle
+ */
+export async function deleteVehicle(vehicleId: number, tenantId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return db
+    .delete(vehicles)
+    .where(and(eq(vehicles.id, vehicleId), eq(vehicles.tenantId, tenantId)));
+}
