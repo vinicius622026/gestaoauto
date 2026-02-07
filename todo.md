@@ -21,9 +21,11 @@
 - [x] Implementar página de dashboard da loja
 - [x] Criar página de gerenciamento de estoque
 - [x] Adicionar página de configurações da loja
-- [ ] Implementar CRUD de veículos com tRPC
-- [ ] Adicionar upload de imagens para veículos
-- [ ] Integrar dados reais do banco de dados
+- [x] Implementar CRUD de veículos com tRPC
+- [x] Adicionar upload de imagens para veículos (S3 com hierarquia)
+- [x] Integrar dados reais do banco de dados
+- [x] Criar formulário avançado com validações
+- [x] Implementar galeria de imagens com seleção de capa
 
 ## Vitrine Pública
 - [x] Criar página pública de exibição de veículos
@@ -51,10 +53,11 @@
 - [x] Criar abas de navegação (Overview, Arquitetura, Features, Análise)
 
 ## Testes & Qualidade
-- [ ] Escrever testes unitários com Vitest
-- [ ] Testar procedimentos tRPC
+- [x] Escrever testes unitários com Vitest (32 testes passando)
+- [x] Testar procedimentos tRPC (auth, tenant, images)
+- [x] Validar isolamento de dados entre tenants
 - [ ] Testar componentes React críticos
-- [ ] Validar isolamento de dados entre tenants
+- [ ] Teste de integração end-to-end
 
 ## Deployment & Finalização
 - [ ] Revisar variáveis de ambiente

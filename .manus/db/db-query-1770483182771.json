@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `images` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`tenantId` int NOT NULL,\n\t`vehicleId` int NOT NULL,\n\t`url` text NOT NULL,\n\t`fileKey` text NOT NULL,\n\t`filename` varchar(255) NOT NULL,\n\t`mimeType` varchar(50) NOT NULL DEFAULT 'image/jpeg',\n\t`fileSize` int,\n\t`isCover` boolean NOT NULL DEFAULT false,\n\t`displayOrder` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `images_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 24JskbNfX5Mfoqc.root --database iwz6R74HyDFupuGjoGjJ3J --execute CREATE TABLE `images` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`tenantId` int NOT NULL,\n\t`vehicleId` int NOT NULL,\n\t`url` text NOT NULL,\n\t`fileKey` text NOT NULL,\n\t`filename` varchar(255) NOT NULL,\n\t`mimeType` varchar(50) NOT NULL DEFAULT 'image/jpeg',\n\t`fileSize` int,\n\t`isCover` boolean NOT NULL DEFAULT false,\n\t`displayOrder` int NOT NULL DEFAULT 0,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `images_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 883
+}

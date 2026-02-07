@@ -146,3 +146,41 @@ export const vehiclesRelations = relations(vehicles, ({ one }) => ({
     references: [tenants.id],
   }),
 }));
+
+/**
+ * Images table - Stores vehicle images with S3 URLs
+ * Isolated by tenant_id via RLS - follows hierarchy: /tenant_id/vehicle_id/image_name.jpg
+ */
+export const images = mysqlTable("images", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Reference to tenant - CRITICAL for RLS isolation */
+  tenantId: int("tenantId").notNull(),
+  /** Reference to vehicle */
+  vehicleId: int("vehicleId").notNull(),
+  /** S3 URL to the image */
+  url: text("url").notNull(),
+  /** S3 file key (path) for reference and deletion */
+  fileKey: text("fileKey").notNull(),
+  /** Original filename */
+  filename: varchar("filename", { length: 255 }).notNull(),
+  /** MIME type of the image */
+  mimeType: varchar("mimeType", { length: 50 }).default("image/jpeg").notNull(),
+  /** File size in bytes */
+  fileSize: int("fileSize"),
+  /** Is this the main/cover image for the vehicle */
+  isCover: boolean("isCover").default(false).notNull(),
+  /** Display order in gallery */
+  displayOrder: int("displayOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Image = typeof images.$inferSelect;
+export type InsertImage = typeof images.$inferInsert;
+
+export const imagesRelations = relations(images, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [images.vehicleId],
+    references: [vehicles.id],
+  }),
+}));
