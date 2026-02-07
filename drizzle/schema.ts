@@ -1,4 +1,14 @@
-import { int, mysqlEnum, mysqlTable, text, timestamp, varchar, decimal, boolean } from "drizzle-orm/mysql-core";
+import {
+  serial,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  varchar,
+  numeric,
+  boolean,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 /**
@@ -6,20 +16,20 @@ import { relations } from "drizzle-orm";
  * Extend this file with additional tables as your product grows.
  * Columns use camelCase to match both database fields and generated types.
  */
-export const users = mysqlTable("users", {
+export const users = pgTable("users", {
   /**
-   * Surrogate primary key. Auto-incremented numeric value managed by the database.
+   * Surrogate primary key. Auto-incremented numeric value managed by Postgres.
    * Use this for relations between tables.
    */
-  id: int("id").autoincrement().primaryKey(),
+  id: serial("id").primaryKey(),
   /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
   openId: varchar("openId", { length: 64 }).notNull().unique(),
   name: text("name"),
   email: varchar("email", { length: 320 }),
   loginMethod: varchar("loginMethod", { length: 64 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
+  role: pgEnum("role_enum", ["user", "admin"])('role').default('user').notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
 });
 
@@ -30,8 +40,8 @@ export type InsertUser = typeof users.$inferInsert;
  * Tenants table - Represents each car dealership store
  * Multi-Tenant architecture: Each tenant is isolated via RLS
  */
-export const tenants = mysqlTable("tenants", {
-  id: int("id").autoincrement().primaryKey(),
+export const tenants = pgTable("tenants", {
+  id: serial("id").primaryKey(),
   /** Unique subdomain identifier (e.g., "loja-a" from "loja-a.autogestao.com.br") */
   subdomain: varchar("subdomain", { length: 64 }).notNull().unique(),
   /** Store name */
@@ -57,7 +67,7 @@ export const tenants = mysqlTable("tenants", {
   /** Is tenant active */
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 export type Tenant = typeof tenants.$inferSelect;
@@ -67,18 +77,18 @@ export type InsertTenant = typeof tenants.$inferInsert;
  * Profiles table - Represents users/dealers associated with a tenant
  * Links users to their tenant with tenant_id for RLS isolation
  */
-export const profiles = mysqlTable("profiles", {
-  id: int("id").autoincrement().primaryKey(),
+export const profiles = pgTable("profiles", {
+  id: serial("id").primaryKey(),
   /** Reference to user from auth system */
-  userId: int("userId").notNull(),
+  userId: integer("userId").notNull(),
   /** Reference to tenant - CRITICAL for RLS isolation */
-  tenantId: int("tenantId").notNull(),
+  tenantId: integer("tenantId").notNull(),
   /** User role within the tenant (owner, manager, viewer) */
-  role: mysqlEnum("role", ["owner", "manager", "viewer"]).default("viewer").notNull(),
+  role: pgEnum("profile_role_enum", ["owner", "manager", "viewer"])('role').default('viewer').notNull(),
   /** Is profile active */
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 export type Profile = typeof profiles.$inferSelect;
@@ -88,22 +98,22 @@ export type InsertProfile = typeof profiles.$inferInsert;
  * Vehicles table - Represents cars in a tenant's inventory
  * Isolated by tenant_id via RLS - each tenant only sees their own vehicles
  */
-export const vehicles = mysqlTable("vehicles", {
-  id: int("id").autoincrement().primaryKey(),
+export const vehicles = pgTable("vehicles", {
+  id: serial("id").primaryKey(),
   /** Reference to tenant - CRITICAL for RLS isolation */
-  tenantId: int("tenantId").notNull(),
+  tenantId: integer("tenantId").notNull(),
   /** Vehicle make/brand (e.g., "Toyota") */
   make: varchar("make", { length: 100 }).notNull(),
   /** Vehicle model (e.g., "Corolla") */
   model: varchar("model", { length: 100 }).notNull(),
   /** Vehicle year */
-  year: int("year").notNull(),
+  year: integer("year").notNull(),
   /** Vehicle color */
   color: varchar("color", { length: 50 }),
   /** Vehicle mileage in km */
-  mileage: int("mileage"),
+  mileage: integer("mileage"),
   /** Vehicle price */
-  price: decimal("price", { precision: 12, scale: 2 }).notNull(),
+  price: numeric("price", { precision: 12, scale: 2 }).notNull(),
   /** Vehicle description */
   description: text("description"),
   /** Vehicle fuel type (gasoline, diesel, electric, hybrid) */
@@ -121,7 +131,7 @@ export const vehicles = mysqlTable("vehicles", {
   /** Featured vehicle for homepage */
   isFeatured: boolean("isFeatured").default(false).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 export type Vehicle = typeof vehicles.$inferSelect;
@@ -151,12 +161,12 @@ export const vehiclesRelations = relations(vehicles, ({ one }) => ({
  * Images table - Stores vehicle images with S3 URLs
  * Isolated by tenant_id via RLS - follows hierarchy: /tenant_id/vehicle_id/image_name.jpg
  */
-export const images = mysqlTable("images", {
-  id: int("id").autoincrement().primaryKey(),
+export const images = pgTable("images", {
+  id: serial("id").primaryKey(),
   /** Reference to tenant - CRITICAL for RLS isolation */
-  tenantId: int("tenantId").notNull(),
+  tenantId: integer("tenantId").notNull(),
   /** Reference to vehicle */
-  vehicleId: int("vehicleId").notNull(),
+  vehicleId: integer("vehicleId").notNull(),
   /** S3 URL to the image */
   url: text("url").notNull(),
   /** S3 file key (path) for reference and deletion */
@@ -166,13 +176,13 @@ export const images = mysqlTable("images", {
   /** MIME type of the image */
   mimeType: varchar("mimeType", { length: 50 }).default("image/jpeg").notNull(),
   /** File size in bytes */
-  fileSize: int("fileSize"),
+  fileSize: integer("fileSize"),
   /** Is this the main/cover image for the vehicle */
   isCover: boolean("isCover").default(false).notNull(),
   /** Display order in gallery */
-  displayOrder: int("displayOrder").default(0).notNull(),
+  displayOrder: integer("displayOrder").default(0).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 export type Image = typeof images.$inferSelect;
@@ -189,12 +199,12 @@ export const imagesRelations = relations(images, ({ one }) => ({
  * WhatsApp Leads table - Tracks clicks on "Tenho Interesse" button
  * Used for analytics and metrics in dashboard
  */
-export const whatsappLeads = mysqlTable("whatsappLeads", {
-  id: int("id").autoincrement().primaryKey(),
+export const whatsappLeads = pgTable("whatsappLeads", {
+  id: serial("id").primaryKey(),
   /** Reference to tenant - CRITICAL for RLS isolation */
-  tenantId: int("tenantId").notNull(),
+  tenantId: integer("tenantId").notNull(),
   /** Reference to vehicle that was clicked */
-  vehicleId: int("vehicleId").notNull(),
+  vehicleId: integer("vehicleId").notNull(),
   /** IP address or identifier of the visitor (optional, for analytics) */
   visitorId: varchar("visitorId", { length: 255 }),
   /** User agent of the visitor */
@@ -220,10 +230,10 @@ export const whatsappLeadsRelations = relations(whatsappLeads, ({ one }) => ({
  * Each tenant can have multiple API keys for different integrations
  * Isolated by tenant_id via RLS
  */
-export const apiKeys = mysqlTable("apiKeys", {
-  id: int("id").autoincrement().primaryKey(),
+export const apiKeys = pgTable("apiKeys", {
+  id: serial("id").primaryKey(),
   /** Reference to tenant - CRITICAL for RLS isolation */
-  tenantId: int("tenantId").notNull(),
+  tenantId: integer("tenantId").notNull(),
   /** Friendly name for the API key */
   name: varchar("name", { length: 255 }).notNull(),
   /** The actual API key (hashed in production) */
@@ -237,7 +247,7 @@ export const apiKeys = mysqlTable("apiKeys", {
   /** Whether this key is active */
   isActive: boolean("isActive").default(true).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 export type ApiKey = typeof apiKeys.$inferSelect;
@@ -254,10 +264,10 @@ export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
  * Webhooks table - Stores webhook configurations for each tenant
  * Used to notify external systems of events (vehicle created, price changed, etc)
  */
-export const webhooks = mysqlTable("webhooks", {
-  id: int("id").autoincrement().primaryKey(),
+export const webhooks = pgTable("webhooks", {
+  id: serial("id").primaryKey(),
   /** Reference to tenant - CRITICAL for RLS isolation */
-  tenantId: int("tenantId").notNull(),
+  tenantId: integer("tenantId").notNull(),
   /** Webhook URL where events will be sent */
   url: text("url").notNull(),
   /** Events this webhook is subscribed to */
@@ -267,11 +277,11 @@ export const webhooks = mysqlTable("webhooks", {
   /** Whether this webhook is active */
   isActive: boolean("isActive").default(true).notNull(),
   /** Number of failed attempts */
-  failureCount: int("failureCount").default(0).notNull(),
+  failureCount: integer("failureCount").default(0).notNull(),
   /** Last error message */
   lastError: text("lastError"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().notNull(),
 });
 
 export type Webhook = typeof webhooks.$inferSelect;
@@ -288,18 +298,18 @@ export const webhooksRelations = relations(webhooks, ({ one }) => ({
  * Webhook Events table - Logs of webhook events sent
  * Used for debugging and audit trail
  */
-export const webhookEvents = mysqlTable("webhookEvents", {
-  id: int("id").autoincrement().primaryKey(),
+export const webhookEvents = pgTable("webhookEvents", {
+  id: serial("id").primaryKey(),
   /** Reference to webhook */
-  webhookId: int("webhookId").notNull(),
+  webhookId: integer("webhookId").notNull(),
   /** Reference to tenant - for RLS isolation */
-  tenantId: int("tenantId").notNull(),
+  tenantId: integer("tenantId").notNull(),
   /** Event type (e.g., "vehicle.created") */
   eventType: varchar("eventType", { length: 100 }).notNull(),
   /** Event payload (JSON) */
   payload: text("payload").notNull(),
   /** HTTP status code of the response */
-  statusCode: int("statusCode"),
+  statusCode: integer("statusCode"),
   /** Response body */
   response: text("response"),
   /** Whether the webhook was successfully delivered */

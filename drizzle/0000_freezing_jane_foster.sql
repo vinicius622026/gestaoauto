@@ -1,13 +1,13 @@
-CREATE TABLE `users` (
-	`id` int AUTO_INCREMENT NOT NULL,
-	`openId` varchar(64) NOT NULL,
-	`name` text,
-	`email` varchar(320),
-	`loginMethod` varchar(64),
-	`role` enum('user','admin') NOT NULL DEFAULT 'user',
-	`createdAt` timestamp NOT NULL DEFAULT (now()),
-	`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
-	`lastSignedIn` timestamp NOT NULL DEFAULT (now()),
-	CONSTRAINT `users_id` PRIMARY KEY(`id`),
-	CONSTRAINT `users_openId_unique` UNIQUE(`openId`)
+CREATE TYPE IF NOT EXISTS "role_enum" AS ENUM ('user', 'admin');
+
+CREATE TABLE "users" (
+	"id" serial PRIMARY KEY,
+	"openId" varchar(64) NOT NULL UNIQUE,
+	"name" text,
+	"email" varchar(320),
+	"loginMethod" varchar(64),
+	"role" "role_enum" NOT NULL DEFAULT 'user',
+	"createdAt" timestamp NOT NULL DEFAULT now(),
+	"updatedAt" timestamp NOT NULL DEFAULT now(),
+	"lastSignedIn" timestamp NOT NULL DEFAULT now()
 );
