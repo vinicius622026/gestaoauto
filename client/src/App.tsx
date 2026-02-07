@@ -11,6 +11,8 @@ import ProjectPresentation from "./pages/ProjectPresentation";
 import AdminDashboard from "./pages/admin/Dashboard";
 import VehiclesCRUDPage from "./pages/admin/VehiclesCRUD";
 import StoreSettingsPage from "./pages/admin/StoreSettings";
+import DealershipDashboard from "./pages/admin/DealershipDashboard";
+import SaaSAdmin from "./pages/admin/SaaSAdmin";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -19,9 +21,10 @@ function Router() {
       <Route path="/" component={Storefront} />
       <Route path="/vehicle/:id" component={VehicleDetails} />
       <Route path="/presentation" component={ProjectPresentation} />
-      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin" component={DealershipDashboard} />
       <Route path="/admin/vehicles" component={VehiclesCRUDPage} />
       <Route path="/admin/store" component={StoreSettingsPage} />
+      <Route path="/admin/saas" component={SaaSAdmin} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `whatsappLeads` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`tenantId` int NOT NULL,\n\t`vehicleId` int NOT NULL,\n\t`visitorId` varchar(255),\n\t`userAgent` text,\n\t`wasCompleted` boolean NOT NULL DEFAULT false,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `whatsappLeads_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 24JskbNfX5Mfoqc.root --database iwz6R74HyDFupuGjoGjJ3J --execute CREATE TABLE `whatsappLeads` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`tenantId` int NOT NULL,\n\t`vehicleId` int NOT NULL,\n\t`visitorId` varchar(255),\n\t`userAgent` text,\n\t`wasCompleted` boolean NOT NULL DEFAULT false,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\tCONSTRAINT `whatsappLeads_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 667
+}

@@ -63,6 +63,22 @@
 - [ ] Testar componentes React críticos
 - [ ] Teste de integração end-to-end
 
+## Integração e Ecossistema MCP
+- [x] Criar tabela `apiKeys` para gerenciamento de chaves de API
+- [x] Criar tabela `webhooks` para notificações
+- [x] Implementar autenticação por API Key (middleware)
+- [x] Criar endpoints REST para CRUD de veículos (GET, POST, PUT, DELETE)
+- [x] Criar helpers de banco de dados para API Keys
+- [ ] Configurar Swagger/OpenAPI com documentação automática
+- [ ] Integrar API routes no servidor Express
+- [ ] Implementar Servidor MCP com SDK oficial
+- [ ] Criar tools MCP (get_inventory, search_vehicle, get_vehicle_leads)
+- [ ] Implementar isolamento por tenant_id no MCP
+- [ ] Criar sistema de Webhooks
+- [ ] Implementar página de gerenciamento de API Keys no dashboard
+- [ ] Testar segurança e isolamento de dados
+- [ ] Documentar API e MCP para desenvolvedores
+
 ## Deployment & Finalização
 - [ ] Revisar variáveis de ambiente
 - [ ] Criar checkpoint final

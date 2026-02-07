@@ -22,6 +22,20 @@
       "when": 1770483176992,
       "tag": "0002_majestic_nocturne",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1770484400769,
+      "tag": "0003_salty_the_hand",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1770484797248,
+      "tag": "0004_eager_absorbing_man",
+      "breakpoints": true
     }
   ]
 }

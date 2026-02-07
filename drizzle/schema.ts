@@ -184,3 +184,135 @@ export const imagesRelations = relations(images, ({ one }) => ({
     references: [vehicles.id],
   }),
 }));
+
+/**
+ * WhatsApp Leads table - Tracks clicks on "Tenho Interesse" button
+ * Used for analytics and metrics in dashboard
+ */
+export const whatsappLeads = mysqlTable("whatsappLeads", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Reference to tenant - CRITICAL for RLS isolation */
+  tenantId: int("tenantId").notNull(),
+  /** Reference to vehicle that was clicked */
+  vehicleId: int("vehicleId").notNull(),
+  /** IP address or identifier of the visitor (optional, for analytics) */
+  visitorId: varchar("visitorId", { length: 255 }),
+  /** User agent of the visitor */
+  userAgent: text("userAgent"),
+  /** Whether the WhatsApp message was actually sent */
+  wasCompleted: boolean("wasCompleted").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WhatsAppLead = typeof whatsappLeads.$inferSelect;
+export type InsertWhatsAppLead = typeof whatsappLeads.$inferInsert;
+
+export const whatsappLeadsRelations = relations(whatsappLeads, ({ one }) => ({
+  vehicle: one(vehicles, {
+    fields: [whatsappLeads.vehicleId],
+    references: [vehicles.id],
+  }),
+}));
+
+
+/**
+ * API Keys table - Stores API keys for external integrations
+ * Each tenant can have multiple API keys for different integrations
+ * Isolated by tenant_id via RLS
+ */
+export const apiKeys = mysqlTable("apiKeys", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Reference to tenant - CRITICAL for RLS isolation */
+  tenantId: int("tenantId").notNull(),
+  /** Friendly name for the API key */
+  name: varchar("name", { length: 255 }).notNull(),
+  /** The actual API key (hashed in production) */
+  key: varchar("key", { length: 255 }).notNull().unique(),
+  /** API key prefix for display (first 8 chars) */
+  keyPrefix: varchar("keyPrefix", { length: 8 }).notNull(),
+  /** Description of what this key is used for */
+  description: text("description"),
+  /** Last time this key was used */
+  lastUsedAt: timestamp("lastUsedAt"),
+  /** Whether this key is active */
+  isActive: boolean("isActive").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ApiKey = typeof apiKeys.$inferSelect;
+export type InsertApiKey = typeof apiKeys.$inferInsert;
+
+export const apiKeysRelations = relations(apiKeys, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [apiKeys.tenantId],
+    references: [tenants.id],
+  }),
+}));
+
+/**
+ * Webhooks table - Stores webhook configurations for each tenant
+ * Used to notify external systems of events (vehicle created, price changed, etc)
+ */
+export const webhooks = mysqlTable("webhooks", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Reference to tenant - CRITICAL for RLS isolation */
+  tenantId: int("tenantId").notNull(),
+  /** Webhook URL where events will be sent */
+  url: text("url").notNull(),
+  /** Events this webhook is subscribed to */
+  events: varchar("events", { length: 255 }).notNull(), // JSON array: ["vehicle.created", "vehicle.updated"]
+  /** Secret for signing webhook payloads */
+  secret: varchar("secret", { length: 255 }).notNull(),
+  /** Whether this webhook is active */
+  isActive: boolean("isActive").default(true).notNull(),
+  /** Number of failed attempts */
+  failureCount: int("failureCount").default(0).notNull(),
+  /** Last error message */
+  lastError: text("lastError"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Webhook = typeof webhooks.$inferSelect;
+export type InsertWebhook = typeof webhooks.$inferInsert;
+
+export const webhooksRelations = relations(webhooks, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [webhooks.tenantId],
+    references: [tenants.id],
+  }),
+}));
+
+/**
+ * Webhook Events table - Logs of webhook events sent
+ * Used for debugging and audit trail
+ */
+export const webhookEvents = mysqlTable("webhookEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  /** Reference to webhook */
+  webhookId: int("webhookId").notNull(),
+  /** Reference to tenant - for RLS isolation */
+  tenantId: int("tenantId").notNull(),
+  /** Event type (e.g., "vehicle.created") */
+  eventType: varchar("eventType", { length: 100 }).notNull(),
+  /** Event payload (JSON) */
+  payload: text("payload").notNull(),
+  /** HTTP status code of the response */
+  statusCode: int("statusCode"),
+  /** Response body */
+  response: text("response"),
+  /** Whether the webhook was successfully delivered */
+  success: boolean("success").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type WebhookEvent = typeof webhookEvents.$inferSelect;
+export type InsertWebhookEvent = typeof webhookEvents.$inferInsert;
+
+export const webhookEventsRelations = relations(webhookEvents, ({ one }) => ({
+  webhook: one(webhooks, {
+    fields: [webhookEvents.webhookId],
+    references: [webhooks.id],
+  }),
+}));
