@@ -74,4 +74,70 @@ export const authRouter = router({
     const profile = await getUserProfile(ctx.user.id, tenantCtx.tenantId);
     return profile?.role || null;
   }),
+
+  /*
+   * New auth procedures wired to server/trpc/auth implementation
+   */
+  signUp: publicProcedure
+    .input(z.object({ email: z.string().email(), password: z.string().min(6), name: z.string().optional() }))
+    .mutation(async ({ input }) => {
+      const impl = await import("../trpc/auth");
+      return impl.authRouter.signUp(input);
+    }),
+
+  signIn: publicProcedure
+    .input(z.object({ email: z.string().email(), password: z.string().min(1) }))
+    .mutation(async ({ input }) => {
+      const impl = await import("../trpc/auth");
+      return impl.authRouter.signIn(input);
+    }),
+
+  requestPasswordReset: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .mutation(async ({ input }) => {
+      const impl = await import("../trpc/auth");
+      return impl.authRouter.requestPasswordReset(input);
+    }),
+
+  resetPassword: publicProcedure
+    .input(z.object({ token: z.string(), newPassword: z.string().min(6) }))
+    .mutation(async ({ input }) => {
+      const impl = await import("../trpc/auth");
+      return impl.authRouter.resetPassword(input);
+    }),
+
+  sendVerificationEmail: publicProcedure
+    .input(z.object({ email: z.string().email() }))
+    .mutation(async ({ input }) => {
+      const impl = await import("../trpc/auth");
+      return impl.authRouter.sendVerificationEmail(input);
+    }),
+
+  verifyEmail: publicProcedure
+    .input(z.object({ token: z.string() }))
+    .mutation(async ({ input }) => {
+      const impl = await import("../trpc/auth");
+      return impl.authRouter.verifyEmail(input);
+    }),
+
+  getSession: publicProcedure
+    .input(z.object({ token: z.string().optional() }).optional())
+    .query(async ({ input }) => {
+      const impl = await import("../trpc/auth");
+      return impl.authRouter.getSession({ token: input?.token });
+    }),
+
+  refreshSession: publicProcedure
+    .input(z.object({ refreshToken: z.string() }))
+    .mutation(async ({ input }) => {
+      const impl = await import("../trpc/auth");
+      return impl.authRouter.refreshSession(input);
+    }),
+
+  signOutLocal: publicProcedure
+    .input(z.object({ refreshToken: z.string().optional() }).optional())
+    .mutation(async ({ input }) => {
+      const impl = await import("../trpc/auth");
+      return impl.authRouter.signOut({ refreshToken: input?.refreshToken });
+    }),
 });

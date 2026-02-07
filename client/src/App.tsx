@@ -8,6 +8,10 @@ import Home from "./pages/Home";
 import Storefront from "./pages/Storefront";
 import VehicleDetails from "./pages/VehicleDetails";
 import ProjectPresentation from "./pages/ProjectPresentation";
+import SignIn from "./pages/auth/SignIn";
+import SignUp from "./pages/auth/SignUp";
+import ResetPassword from "./pages/auth/ResetPassword";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 import AdminDashboard from "./pages/admin/Dashboard";
 import VehiclesCRUDPage from "./pages/admin/VehiclesCRUD";
 import StoreSettingsPage from "./pages/admin/StoreSettings";
@@ -18,6 +22,10 @@ function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
+    <Route path="/auth/signin" component={SignIn} />
+    <Route path="/auth/signup" component={SignUp} />
+    <Route path="/auth/reset" component={ResetPassword} />
+    <Route path="/auth/verify" component={VerifyEmail} />
       <Route path="/" component={Storefront} />
       <Route path="/vehicle/:id" component={VehicleDetails} />
       <Route path="/presentation" component={ProjectPresentation} />
