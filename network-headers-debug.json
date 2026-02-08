@@ -1,0 +1,53 @@
+[
+  {
+    "url": "http://localhost:3018/api/trpc/admin.getPlatformStats,admin.getAllTenants?batch=1&input=%7B%220%22%3A%7B%22json%22%3Anull%2C%22meta%22%3A%7B%22values%22%3A%5B%22undefined%22%5D%7D%7D%2C%221%22%3A%7B%22json%22%3Anull%2C%22meta%22%3A%7B%22values%22%3A%5B%22undefined%22%5D%7D%7D%7D",
+    "headers": {
+      "host": "localhost:3018",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+      "accept": "*/*",
+      "accept-language": "en-US",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "referer": "http://localhost:3018/admin/saas",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "connection": "keep-alive",
+      "cookie": "app_session_id=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcGVuSWQiOiJlMmUtYWRtaW4iLCJhcHBJZCI6ImUyZS1hcHAiLCJuYW1lIjoiRTJFIEFkbWluIiwiZXhwIjoxODAyMTAwNjY1fQ.M5Rehgj67VNJ7tQ3SV0q-ZeC_xfXLnWR12gQ51IJvHg"
+    }
+  },
+  {
+    "url": "http://localhost:3018/api/trpc/tenant.checkSubdomainAvailable?batch=1&input=%7B%220%22%3A%7B%22json%22%3A%7B%22subdomain%22%3A%22autogesto-debug-1770574950628%22%7D%7D%7D",
+    "headers": {
+      "host": "localhost:3018",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+      "accept": "*/*",
+      "accept-language": "en-US",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "referer": "http://localhost:3018/admin/saas",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "connection": "keep-alive",
+      "cookie": "app_session_id=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcGVuSWQiOiJlMmUtYWRtaW4iLCJhcHBJZCI6ImUyZS1hcHAiLCJuYW1lIjoiRTJFIEFkbWluIiwiZXhwIjoxODAyMTAwNjY1fQ.M5Rehgj67VNJ7tQ3SV0q-ZeC_xfXLnWR12gQ51IJvHg"
+    }
+  },
+  {
+    "url": "http://localhost:3018/api/trpc/admin.createTenant?batch=1",
+    "headers": {
+      "host": "localhost:3018",
+      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:146.0.1) Gecko/20100101 Firefox/146.0.1",
+      "accept": "*/*",
+      "accept-language": "en-US",
+      "accept-encoding": "gzip, deflate, br, zstd",
+      "content-type": "application/json",
+      "content-length": "155",
+      "referer": "http://localhost:3018/admin/saas",
+      "origin": "http://localhost:3018",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "connection": "keep-alive",
+      "cookie": "app_session_id=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJvcGVuSWQiOiJlMmUtYWRtaW4iLCJhcHBJZCI6ImUyZS1hcHAiLCJuYW1lIjoiRTJFIEFkbWluIiwiZXhwIjoxODAyMTAwNjY1fQ.M5Rehgj67VNJ7tQ3SV0q-ZeC_xfXLnWR12gQ51IJvHg"
+    }
+  }
+]

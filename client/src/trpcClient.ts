@@ -3,6 +3,9 @@ import type { AppRouter } from '../../server/routers';
 
 export const trpc = createTRPCProxyClient<AppRouter>({
   links: [
-    httpBatchLink({ url: (import.meta.env.VITE_API_URL ?? '/api') + '/trpc' }),
+    httpBatchLink({
+      url: (import.meta.env.VITE_API_URL ?? '/api') + '/trpc',
+      fetch: (input, init) => fetch(input, { ...init, credentials: 'include' }),
+    }),
   ],
 });

@@ -216,7 +216,7 @@ importers:
         specifier: ^0.1.1
         version: 0.1.1(vite@7.1.9(@types/node@24.7.0)(jiti@2.6.1)(lightningcss@1.30.1)(tsx@4.20.6))
       '@playwright/test':
-        specifier: ^1.39.2
+        specifier: ^1.58.2
         version: 1.58.2
       '@tailwindcss/typography':
         specifier: ^0.5.15
@@ -257,6 +257,9 @@ importers:
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
+      playwright:
+        specifier: 1.35.0
+        version: 1.35.0
       pnpm:
         specifier: ^10.15.1
         version: 10.18.0
@@ -3752,9 +3755,19 @@ packages:
   pkg-types@2.3.0:
     resolution: {integrity: sha512-SIqCzDRg0s9npO5XQ3tNZioRY1uK06lA41ynBC1YmFTmnY6FjUjVt6s4LoADmwoig1qqD0oK8h1p/8mlMx8Oig==}
 
+  playwright-core@1.35.0:
+    resolution: {integrity: sha512-muMXyPmIx/2DPrCHOD1H1ePT01o7OdKxKj2ebmCAYvqhUy+Y1bpal7B0rdoxros7YrXI294JT/DWw2LqyiqTPA==}
+    engines: {node: '>=16'}
+    hasBin: true
+
   playwright-core@1.58.2:
     resolution: {integrity: sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==}
     engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.35.0:
+    resolution: {integrity: sha512-xhFhsoBmKPQfj3dM+HbIiFVlqRCZp2rwdJd/QFd9YBuidabo3TkVv0iuxPQ4vZoMwtSI7qzjY93f5ohdC97hww==}
+    engines: {node: '>=16'}
     hasBin: true
 
   playwright@1.58.2:
@@ -8474,7 +8487,13 @@ snapshots:
       exsolve: 1.0.7
       pathe: 2.0.3
 
+  playwright-core@1.35.0: {}
+
   playwright-core@1.58.2: {}
+
+  playwright@1.35.0:
+    dependencies:
+      playwright-core: 1.35.0
 
   playwright@1.58.2:
     dependencies:

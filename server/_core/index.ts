@@ -30,6 +30,20 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+  // simple request logger to aid debugging of stalled responses
+  app.use((req, res, next) => {
+    console.log(`[REQ] ${req.method} ${req.originalUrl}`);
+    next();
+  });
+  // debug: log cookie and origin headers to troubleshoot auth in E2E
+  app.use((req, res, next) => {
+    try {
+      console.log(`[COOKIE DEBUG] cookie:`, req.get("cookie") || null, "origin:", req.get("origin") || null, "host:", req.get("host") || null);
+    } catch (e) {
+      /* ignore */
+    }
+    next();
+  });
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));

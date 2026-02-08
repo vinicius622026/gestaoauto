@@ -7,8 +7,9 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useTenant } from "@/_core/hooks/useTenant";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
-import { Menu, X, LogOut, Home, Car, Settings, Store } from "lucide-react";
+import { Menu, X, LogOut, Home, Car, Settings, Store, BarChart3 } from "lucide-react";
 import { useState } from "react";
+import { GlobalNavTabs } from "./GlobalNavTabs";
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -26,6 +27,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { label: "Dashboard", icon: Home, path: "/admin" },
     { label: "Veículos", icon: Car, path: "/admin/vehicles" },
     { label: "Loja", icon: Store, path: "/admin/store" },
+    { label: "Dashboard de Testes", icon: BarChart3, path: "/admin/system-dashboard" },
     { label: "Configurações", icon: Settings, path: "/admin/settings" },
   ];
 
@@ -101,7 +103,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       {/* Main Content */}
       <main className="flex-1 overflow-auto">
-        <div className="min-h-screen bg-slate-50 p-6">{children}</div>
+        <div className="min-h-screen bg-slate-50">
+          <GlobalNavTabs />
+          <div className="p-6">{children}</div>
+        </div>
       </main>
     </div>
   );

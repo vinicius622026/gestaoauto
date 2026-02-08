@@ -167,6 +167,8 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    // Generate source maps for production builds to aid E2E debugging
+    sourcemap: true,
   },
   server: {
     host: true,

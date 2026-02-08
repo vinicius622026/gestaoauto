@@ -3,7 +3,7 @@ import FormContainer from '../../components/FormContainer';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { trpc } from '../..//trpcClient';
+import { trpc } from '../../lib/trpc';
 import { useSearchParams } from 'wouter';
 
 const requestSchema = z.object({ email: z.string().email() });

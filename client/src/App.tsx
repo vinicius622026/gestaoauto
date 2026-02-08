@@ -12,11 +12,13 @@ import SignIn from "./pages/auth/SignIn";
 import SignUp from "./pages/auth/SignUp";
 import ResetPassword from "./pages/auth/ResetPassword";
 import VerifyEmail from "./pages/auth/VerifyEmail";
+import Login from "./pages/Login";
 import AdminDashboard from "./pages/admin/Dashboard";
 import VehiclesCRUDPage from "./pages/admin/VehiclesCRUD";
 import StoreSettingsPage from "./pages/admin/StoreSettings";
 import DealershipDashboard from "./pages/admin/DealershipDashboard";
 import SaaSAdmin from "./pages/admin/SaaSAdmin";
+import SystemDashboard from "./pages/SystemDashboard";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -26,6 +28,7 @@ function Router() {
     <Route path="/auth/signup" component={SignUp} />
     <Route path="/auth/reset" component={ResetPassword} />
     <Route path="/auth/verify" component={VerifyEmail} />
+    <Route path="/login" component={Login} />
       <Route path="/" component={Storefront} />
       <Route path="/vehicle/:id" component={VehicleDetails} />
       <Route path="/presentation" component={ProjectPresentation} />
@@ -33,6 +36,7 @@ function Router() {
       <Route path="/admin/vehicles" component={VehiclesCRUDPage} />
       <Route path="/admin/store" component={StoreSettingsPage} />
       <Route path="/admin/saas" component={SaaSAdmin} />
+      <Route path="/admin/system-dashboard" component={SystemDashboard} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

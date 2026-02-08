@@ -3,6 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, TrendingUp, Package, MessageCircle, DollarSign } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import AdminLayout from "@/components/AdminLayout";
 
 /**
  * Dealership Dashboard
@@ -40,15 +41,18 @@ export default function DealershipDashboard() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="animate-spin text-blue-600" size={40} />
-      </div>
+      <AdminLayout>
+        <div className="flex items-center justify-center h-96">
+          <Loader2 className="animate-spin text-blue-600" size={40} />
+        </div>
+      </AdminLayout>
     );
   }
 
   const metrics = metricsQuery.data;
 
   return (
+    <AdminLayout>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
@@ -231,5 +235,6 @@ export default function DealershipDashboard() {
         </Card>
       )}
     </div>
+    </AdminLayout>
   );
 }

@@ -10,7 +10,7 @@ test.describe('Auth flows', () => {
     await page.fill('input[placeholder="Email"]', email);
     await page.fill('input[placeholder="Senha"]', password);
 
-    const signUpRespPromise = page.waitForResponse(resp => resp.url().endsWith('/api/trpc') && resp.request().postData()?.includes('auth.signUp'));
+    const signUpRespPromise = page.waitForResponse(resp => resp.url().includes('/api/trpc') && (resp.request().postData()?.includes('auth.signUp') || resp.url().includes('auth.signUp')));
     await page.click('button:has-text("Criar conta")');
     const signUpResp = await signUpRespPromise;
     expect(signUpResp.status()).toBe(200);
@@ -20,7 +20,7 @@ test.describe('Auth flows', () => {
     await page.fill('input[placeholder="Email"]', email);
     await page.fill('input[placeholder="Senha"]', password);
 
-    const signInRespPromise = page.waitForResponse(resp => resp.url().endsWith('/api/trpc') && resp.request().postData()?.includes('auth.signIn'));
+    const signInRespPromise = page.waitForResponse(resp => resp.url().includes('/api/trpc') && (resp.request().postData()?.includes('auth.signIn') || resp.url().includes('auth.signIn')));
     await page.click('button:has-text("Entrar")');
     const signInResp = await signInRespPromise;
     expect(signInResp.status()).toBe(200);

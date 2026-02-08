@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Plus, ToggleLeft, ToggleRight, Building2, Users, Package, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
+import AdminLayout from "@/components/AdminLayout";
 
 /**
  * SaaS Admin Dashboard
@@ -70,6 +71,7 @@ export default function SaaSAdmin() {
   const tenants = tenantsQuery.data || [];
 
   return (
+    <AdminLayout>
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
@@ -297,5 +299,6 @@ export default function SaaSAdmin() {
         </CardContent>
       </Card>
     </div>
+    </AdminLayout>
   );
 }

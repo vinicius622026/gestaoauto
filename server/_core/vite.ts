@@ -23,8 +23,8 @@ export async function setupVite(app: Express, server: Server) {
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
-
     try {
+      console.log(`[VITE] handling ${url}`);
       const clientTemplate = path.resolve(
         import.meta.dirname,
         "../..",
@@ -33,15 +33,22 @@ export async function setupVite(app: Express, server: Server) {
       );
 
       // always reload the index.html file from disk incase it changes
+      console.log("[VITE] reading index.html from disk");
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      console.log("[VITE] read index.html, length=", template.length);
       template = template.replace(
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid()}"`
       );
+      console.log("[VITE] transforming index.html via vite.transformIndexHtml");
       const page = await vite.transformIndexHtml(url, template);
+      console.log("[VITE] transform complete, sending response");
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {
-      vite.ssrFixStacktrace(e as Error);
+      console.error("[VITE] error while handling", url, e);
+      try {
+        vite.ssrFixStacktrace(e as Error);
+      } catch {}
       next(e);
     }
   });

@@ -1,6 +1,7 @@
 import { systemRouter } from "./_core/systemRouter";
 import { router } from "./_core/trpc";
 import { authRouter } from "./routers/auth";
+import { authLoginRouter } from "./routers/auth-login";
 import { vehiclesRouter } from "./routers/vehicles";
 import { imagesRouter } from "./routers/images";
 import { metricsRouter } from "./routers/metrics";
@@ -12,6 +13,7 @@ export const appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
   auth: authRouter,
+  authLogin: authLoginRouter,
   tenant: tenantRouter,
   vehicles: vehiclesRouter,
   images: imagesRouter,
