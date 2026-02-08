@@ -21,6 +21,15 @@ export default function SaaSAdmin() {
     phone: "",
   });
 
+  // Check subdomain availability
+  const subdomainQuery = trpc.tenant.checkSubdomainAvailable.useQuery(
+    { subdomain: formData.subdomain },
+    {
+      enabled: formData.subdomain.length >= 3,
+      retry: false,
+    }
+  );
+
   // Fetch platform statistics
   const statsQuery = trpc.admin.getPlatformStats.useQuery();
   const tenantsQuery = trpc.admin.getAllTenants.useQuery();
@@ -167,6 +176,18 @@ export default function SaaSAdmin() {
                     disabled={createTenantMutation.isPending}
                   />
                   <p className="text-xs text-slate-500 mt-1">Será acessível em: loja-a.autogestao.com.br</p>
+                  {formData.subdomain.length > 0 && (
+                    <p className="text-xs mt-1">
+                      {subdomainQuery.isLoading && <span className="text-slate-500">Verificando...</span>}
+                      {subdomainQuery.data && subdomainQuery.data.available && (
+                        <span className="text-emerald-600">Disponível</span>
+                      )}
+                      {subdomainQuery.data && !subdomainQuery.data.available && (
+                        <span className="text-red-600">{subdomainQuery.data.message || 'Indisponível'}</span>
+                      )}
+                      {subdomainQuery.isError && <span className="text-red-600">Erro ao verificar</span>}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">
