@@ -103,3 +103,14 @@
 - [x] Criar página de seleção de tenant
 - [ ] Implementar validação de tenant no backend
 - [x] Criar testes para multi-tenancy
+
+
+## Autenticação Local (Novo)
+- [x] Remover OAuth do Manus
+- [x] Criar procedures tRPC para login com email/senha
+- [x] Criar procedures tRPC para cadastro com email/senha
+- [x] Implementar hash de senha com bcrypt
+- [x] Atualizar página de Login para usar autenticação local
+- [x] Atualizar página de Signup para usar autenticação local
+- [x] Implementar validação de email único
+- [x] Testar fluxo completo de login e cadastro

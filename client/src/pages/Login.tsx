@@ -4,38 +4,51 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { useTenantContext } from "@/contexts/TenantContext";
-import { getLoginUrl } from "@/const";
-import { Loader2, Car } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { Loader2, Car, AlertCircle } from "lucide-react";
 
 export default function Login() {
-  const { isAuthenticated, loading } = useAuth();
   const [, setLocation] = useLocation();
   const tenant = useTenantContext();
   
   const [email, setEmail] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated && !loading) {
-      setLocation("/dashboard");
+  const loginMutation = trpc.auth.login.useMutation();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!email || !password) {
+      setError("Por favor, preencha todos os campos");
+      return;
     }
-  }, [isAuthenticated, loading, setLocation]);
 
-  const handleLogin = () => {
-    const loginUrl = getLoginUrl();
-    window.location.href = loginUrl;
+    setIsLoading(true);
+
+    try {
+      const result = await loginMutation.mutateAsync({
+        email,
+        password,
+      });
+
+      if (result.success) {
+        // Store user info in localStorage
+        localStorage.setItem("user", JSON.stringify(result.user));
+        
+        // Redirect to dashboard
+        setLocation("/dashboard");
+      }
+    } catch (err: any) {
+      setError(err.message || "Erro ao fazer login");
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4">
@@ -70,59 +83,82 @@ export default function Login() {
               Faça login para acessar sua concessionária
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Email input (for future use) */}
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-slate-300">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-500"
-                disabled={isSubmitting}
-              />
-            </div>
-
-            {/* OAuth login button */}
-            <Button
-              onClick={handleLogin}
-              disabled={isSubmitting}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-10"
-            >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Conectando...
-                </>
-              ) : (
-                "Entrar com Manus"
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Error message */}
+              {error && (
+                <div className="p-3 bg-red-900/20 border border-red-700 rounded-lg flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-red-400 text-sm">{error}</p>
+                </div>
               )}
-            </Button>
 
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-600" />
+              {/* Email input */}
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-slate-300">
+                  Email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setError(null);
+                  }}
+                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-500"
+                  disabled={isLoading}
+                />
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-slate-800/50 text-slate-400">ou</span>
-              </div>
-            </div>
 
-            {/* Signup link */}
-            <div className="text-center text-sm text-slate-400">
-              Não tem conta?{" "}
-              <button
-                onClick={() => setLocation("/signup")}
-                className="text-blue-400 hover:text-blue-300 font-medium"
+              {/* Password input */}
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-slate-300">
+                  Senha
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError(null);
+                  }}
+                  className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-500"
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Submit button */}
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold h-10"
               >
-                Crie uma agora
-              </button>
-            </div>
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Conectando...
+                  </>
+                ) : (
+                  "Entrar"
+                )}
+              </Button>
+
+              {/* Signup link */}
+              <div className="text-center text-sm text-slate-400">
+                Não tem conta?{" "}
+                <button
+                  type="button"
+                  onClick={() => setLocation("/signup")}
+                  className="text-blue-400 hover:text-blue-300 font-medium"
+                >
+                  Crie uma agora
+                </button>
+              </div>
+            </form>
           </CardContent>
         </Card>
 

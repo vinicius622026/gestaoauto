@@ -4,12 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/_core/hooks/useAuth";
 import { useTenantContext } from "@/contexts/TenantContext";
-import { Loader2, Car, ArrowLeft } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { Loader2, Car, ArrowLeft, AlertCircle, CheckCircle2 } from "lucide-react";
 
 export default function Signup() {
-  const { isAuthenticated, loading } = useAuth();
   const [, setLocation] = useLocation();
   const tenant = useTenantContext();
   
@@ -18,32 +17,36 @@ export default function Signup() {
     email: "",
     password: "",
     confirmPassword: "",
-    acceptTerms: false,
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [emailValid, setEmailValid] = useState(false);
 
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (isAuthenticated && !loading) {
-      setLocation("/dashboard");
-    }
-  }, [isAuthenticated, loading, setLocation]);
+  const signupMutation = trpc.auth.signup.useMutation();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]: value,
     }));
     setError(null);
+    
+    // Validate email format
+    if (name === "email") {
+      setEmailValid(value.includes("@") && value.includes("."));
+    }
   };
 
   const validateForm = () => {
     if (!formData.name.trim()) {
       setError("Nome é obrigatório");
+      return false;
+    }
+    if (formData.name.length < 3) {
+      setError("Nome deve ter pelo menos 3 caracteres");
       return false;
     }
     if (!formData.email.includes("@")) {
@@ -54,12 +57,20 @@ export default function Signup() {
       setError("Senha deve ter pelo menos 6 caracteres");
       return false;
     }
-    if (formData.password !== formData.confirmPassword) {
-      setError("Senhas não conferem");
+    if (!/[a-z]/.test(formData.password)) {
+      setError("Senha deve conter letras minúsculas");
       return false;
     }
-    if (!formData.acceptTerms) {
-      setError("Você deve aceitar os termos de serviço");
+    if (!/[A-Z]/.test(formData.password)) {
+      setError("Senha deve conter letras maiúsculas");
+      return false;
+    }
+    if (!/[0-9]/.test(formData.password)) {
+      setError("Senha deve conter números");
+      return false;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Senhas não conferem");
       return false;
     }
     return true;
@@ -75,36 +86,26 @@ export default function Signup() {
     setIsSubmitting(true);
     
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      setSuccess(true);
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        acceptTerms: false,
+      const result = await signupMutation.mutateAsync({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
       });
-      
-      // Redirect to login after 2 seconds
-      setTimeout(() => {
-        setLocation("/login");
-      }, 2000);
-    } catch (err) {
-      setError("Erro ao criar conta. Tente novamente.");
+
+      if (result.success) {
+        setSuccess(true);
+        
+        // Redirect to login after 2 seconds
+        setTimeout(() => {
+          setLocation("/login");
+        }, 2000);
+      }
+    } catch (err: any) {
+      setError(err.message || "Erro ao criar conta");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 px-4 py-8">
@@ -144,9 +145,10 @@ export default function Signup() {
         {success && (
           <Card className="bg-green-900/20 border-green-700 mb-6">
             <CardContent className="pt-6">
-              <p className="text-green-400 text-center">
-                ✓ Conta criada com sucesso! Redirecionando para login...
-              </p>
+              <div className="flex items-center gap-2 text-green-400">
+                <CheckCircle2 className="w-5 h-5" />
+                <p>Conta criada com sucesso! Redirecionando para login...</p>
+              </div>
             </CardContent>
           </Card>
         )}
@@ -163,7 +165,8 @@ export default function Signup() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Error message */}
               {error && (
-                <div className="p-3 bg-red-900/20 border border-red-700 rounded-lg">
+                <div className="p-3 bg-red-900/20 border border-red-700 rounded-lg flex items-start gap-2">
+                  <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                   <p className="text-red-400 text-sm">{error}</p>
                 </div>
               )}
@@ -187,9 +190,17 @@ export default function Signup() {
 
               {/* Email field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-300">
-                  Email
-                </Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="email" className="text-slate-300">
+                    Email
+                  </Label>
+                  {emailValid && (
+                    <span className="text-xs text-green-400 flex items-center gap-1">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Válido
+                    </span>
+                  )}
+                </div>
                 <Input
                   id="email"
                   name="email"
@@ -217,6 +228,9 @@ export default function Signup() {
                   className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-500"
                   disabled={isSubmitting}
                 />
+                <p className="text-xs text-slate-400">
+                  Mínimo 6 caracteres, com letras maiúsculas, minúsculas e números
+                </p>
               </div>
 
               {/* Confirm password field */}
@@ -234,25 +248,6 @@ export default function Signup() {
                   className="bg-slate-700 border-slate-600 text-white placeholder:text-slate-500"
                   disabled={isSubmitting}
                 />
-              </div>
-
-              {/* Terms checkbox */}
-              <div className="flex items-center space-x-2">
-                <input
-                  id="acceptTerms"
-                  name="acceptTerms"
-                  type="checkbox"
-                  checked={formData.acceptTerms}
-                  onChange={handleChange}
-                  className="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600"
-                  disabled={isSubmitting}
-                />
-                <Label htmlFor="acceptTerms" className="text-slate-400 text-sm cursor-pointer">
-                  Aceito os{" "}
-                  <a href="#" className="text-blue-400 hover:text-blue-300">
-                    termos de serviço
-                  </a>
-                </Label>
               </div>
 
               {/* Submit button */}
