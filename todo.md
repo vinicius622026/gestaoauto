@@ -92,3 +92,14 @@
 - [ ] Create final checkpoint
 - [ ] Document deployment steps
 - [ ] Verify SSL/TLS for subdomains
+
+
+## Multi-Tenant Authentication (Nova)
+- [x] Criar hook para detectar subdomínio atual
+- [x] Implementar contexto global de tenant
+- [x] Criar tela de cadastro de usuário
+- [x] Criar telas de login específicas por tenant
+- [x] Implementar roteamento dinâmico por subdomínio
+- [x] Criar página de seleção de tenant
+- [ ] Implementar validação de tenant no backend
+- [x] Criar testes para multi-tenancy

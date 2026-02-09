@@ -5,12 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useTenantContext } from "@/contexts/TenantContext";
 import { getLoginUrl } from "@/const";
 import { Loader2, Car } from "lucide-react";
 
 export default function Login() {
   const { isAuthenticated, loading } = useAuth();
   const [, setLocation] = useLocation();
+  const tenant = useTenantContext();
+  
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -49,7 +52,12 @@ export default function Login() {
             <div className="p-2 bg-blue-600 rounded-lg">
               <Car className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white">AutoGestão Pro</h1>
+            <div>
+              <h1 className="text-3xl font-bold text-white">AutoGestão Pro</h1>
+              {tenant.tenantName && (
+                <p className="text-sm text-slate-400">{tenant.tenantName}</p>
+              )}
+            </div>
           </div>
           <p className="text-slate-400">Plataforma de Gestão de Concessionárias</p>
         </div>
@@ -95,9 +103,38 @@ export default function Login() {
               )}
             </Button>
 
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-600" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-slate-800/50 text-slate-400">ou</span>
+              </div>
+            </div>
 
+            {/* Signup link */}
+            <div className="text-center text-sm text-slate-400">
+              Não tem conta?{" "}
+              <button
+                onClick={() => setLocation("/signup")}
+                className="text-blue-400 hover:text-blue-300 font-medium"
+              >
+                Crie uma agora
+              </button>
+            </div>
           </CardContent>
         </Card>
+
+        {/* Tenant info */}
+        {tenant.subdomain && (
+          <div className="mt-6 p-4 bg-slate-800/30 border border-slate-700 rounded-lg text-center">
+            <p className="text-xs text-slate-500">Você está acessando:</p>
+            <p className="text-sm font-medium text-slate-300 mt-1">
+              {tenant.tenantName || tenant.subdomain}
+            </p>
+          </div>
+        )}
 
         {/* Footer info */}
         <div className="mt-8 text-center text-sm text-slate-500">
