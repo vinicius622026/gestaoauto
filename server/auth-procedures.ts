@@ -6,19 +6,12 @@ import {
   validateEmail,
   validatePassword,
 } from "./auth-local";
+import {
+  getUserByEmail,
+  createUser,
+  emailExists,
+} from "./user-storage";
 import { TRPCError } from "@trpc/server";
-
-// Mock database for users - em produção, usar banco de dados real
-const users: Map<
-  string,
-  {
-    id: string;
-    email: string;
-    name: string;
-    passwordHash: string;
-    createdAt: Date;
-  }
-> = new Map();
 
 export const authLocalRouter = router({
   /**
@@ -51,10 +44,7 @@ export const authLocalRouter = router({
       }
 
       // Check if email already exists
-      const existingUser = Array.from(users.values()).find(
-        (u) => u.email === input.email
-      );
-      if (existingUser) {
+      if (emailExists(input.email)) {
         throw new TRPCError({
           code: "CONFLICT",
           message: "Email já cadastrado",
@@ -66,21 +56,23 @@ export const authLocalRouter = router({
 
       // Create user
       const userId = `user-${Date.now()}`;
-      users.set(userId, {
+      const user = createUser({
         id: userId,
         email: input.email,
         name: input.name,
         passwordHash,
-        createdAt: new Date(),
+        createdAt: new Date().toISOString(),
       });
+
+      console.log(`[Auth] User created: ${input.email}`);
 
       return {
         success: true,
         message: "Conta criada com sucesso",
         user: {
-          id: userId,
-          email: input.email,
-          name: input.name,
+          id: user.id,
+          email: user.email,
+          name: user.name,
         },
       };
     }),
@@ -96,12 +88,13 @@ export const authLocalRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      console.log(`[Auth] Login attempt: ${input.email}`);
+
       // Find user by email
-      const user = Array.from(users.values()).find(
-        (u) => u.email === input.email
-      );
+      const user = getUserByEmail(input.email);
 
       if (!user) {
+        console.log(`[Auth] User not found: ${input.email}`);
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Email ou senha incorretos",
@@ -115,11 +108,14 @@ export const authLocalRouter = router({
       );
 
       if (!passwordMatch) {
+        console.log(`[Auth] Password mismatch for: ${input.email}`);
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Email ou senha incorretos",
         });
       }
+
+      console.log(`[Auth] Login successful: ${input.email}`);
 
       return {
         success: true,
@@ -138,9 +134,7 @@ export const authLocalRouter = router({
   checkEmailAvailable: publicProcedure
     .input(z.object({ email: z.string().email() }))
     .query(({ input }) => {
-      const exists = Array.from(users.values()).some(
-        (u) => u.email === input.email
-      );
+      const exists = emailExists(input.email);
       return {
         available: !exists,
       };
