@@ -6,11 +6,7 @@ import {
   validateEmail,
   validatePassword,
 } from "./auth-local";
-import {
-  getUserByEmail,
-  createUser,
-  emailExists,
-} from "./user-storage";
+import { UserStore } from "./user-store";
 import { TRPCError } from "@trpc/server";
 
 export const authLocalRouter = router({
@@ -26,8 +22,11 @@ export const authLocalRouter = router({
       })
     )
     .mutation(async ({ input }) => {
+      console.log(`[Auth Signup] Starting signup for: ${input.email}`);
+
       // Validate email format
       if (!validateEmail(input.email)) {
+        console.log(`[Auth Signup] Invalid email format: ${input.email}`);
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: "Email inválido",
@@ -37,6 +36,10 @@ export const authLocalRouter = router({
       // Validate password strength
       const passwordValidation = validatePassword(input.password);
       if (!passwordValidation.valid) {
+        console.log(
+          `[Auth Signup] Invalid password for: ${input.email}`,
+          passwordValidation.errors
+        );
         throw new TRPCError({
           code: "BAD_REQUEST",
           message: passwordValidation.errors.join(", "),
@@ -44,7 +47,8 @@ export const authLocalRouter = router({
       }
 
       // Check if email already exists
-      if (emailExists(input.email)) {
+      if (UserStore.emailExists(input.email)) {
+        console.log(`[Auth Signup] Email already exists: ${input.email}`);
         throw new TRPCError({
           code: "CONFLICT",
           message: "Email já cadastrado",
@@ -53,18 +57,20 @@ export const authLocalRouter = router({
 
       // Hash password
       const passwordHash = await hashPassword(input.password);
+      console.log(`[Auth Signup] Password hashed for: ${input.email}`);
 
       // Create user
       const userId = `user-${Date.now()}`;
-      const user = createUser({
+      const user = UserStore.create({
         id: userId,
         email: input.email,
         name: input.name,
         passwordHash,
-        createdAt: new Date().toISOString(),
+        createdAt: new Date(),
       });
 
-      console.log(`[Auth] User created: ${input.email}`);
+      console.log(`[Auth Signup] User created successfully: ${input.email}`);
+      console.log(`[Auth Signup] Total users in store: ${UserStore.size()}`);
 
       return {
         success: true,
@@ -88,18 +94,26 @@ export const authLocalRouter = router({
       })
     )
     .mutation(async ({ input }) => {
-      console.log(`[Auth] Login attempt: ${input.email}`);
+      console.log(`[Auth Login] Starting login for: ${input.email}`);
+      console.log(`[Auth Login] Total users in store: ${UserStore.size()}`);
+      console.log(
+        `[Auth Login] All users: ${UserStore.getAll()
+          .map((u) => u.email)
+          .join(", ")}`
+      );
 
       // Find user by email
-      const user = getUserByEmail(input.email);
+      const user = UserStore.findByEmail(input.email);
 
       if (!user) {
-        console.log(`[Auth] User not found: ${input.email}`);
+        console.log(`[Auth Login] User not found: ${input.email}`);
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Email ou senha incorretos",
         });
       }
+
+      console.log(`[Auth Login] User found, comparing passwords...`);
 
       // Compare password
       const passwordMatch = await comparePassword(
@@ -108,14 +122,14 @@ export const authLocalRouter = router({
       );
 
       if (!passwordMatch) {
-        console.log(`[Auth] Password mismatch for: ${input.email}`);
+        console.log(`[Auth Login] Password mismatch for: ${input.email}`);
         throw new TRPCError({
           code: "UNAUTHORIZED",
           message: "Email ou senha incorretos",
         });
       }
 
-      console.log(`[Auth] Login successful: ${input.email}`);
+      console.log(`[Auth Login] Login successful: ${input.email}`);
 
       return {
         success: true,
@@ -134,9 +148,27 @@ export const authLocalRouter = router({
   checkEmailAvailable: publicProcedure
     .input(z.object({ email: z.string().email() }))
     .query(({ input }) => {
-      const exists = emailExists(input.email);
+      const exists = UserStore.emailExists(input.email);
+      console.log(
+        `[Auth Check] Email availability for ${input.email}: ${!exists}`
+      );
       return {
         available: !exists,
       };
     }),
+
+  /**
+   * Debug: Get all users (remove in production)
+   */
+  debug_getAllUsers: publicProcedure.query(() => {
+    const users = UserStore.getAll();
+    return {
+      count: users.length,
+      users: users.map((u) => ({
+        id: u.id,
+        email: u.email,
+        name: u.name,
+      })),
+    };
+  }),
 });
