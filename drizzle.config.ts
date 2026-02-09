@@ -1,15 +1,18 @@
 import { defineConfig } from "drizzle-kit";
+import { config } from "dotenv";
 
-const connectionString = process.env.DATABASE_URL;
+config({ path: ".env" });
+
+const connectionString = process.env.DATABASE_URL || "file:./dev.db";
 if (!connectionString) {
-  throw new Error("DATABASE_URL is required to run drizzle commands");
+  console.warn("DATABASE_URL not set, using SQLite local database");
 }
 
 export default defineConfig({
   schema: "./drizzle/schema.ts",
   out: "./drizzle",
-  dialect: "mysql",
+  dialect: "sqlite",
   dbCredentials: {
-    url: connectionString,
+    url: connectionString || "file:./dev.db",
   },
 });
